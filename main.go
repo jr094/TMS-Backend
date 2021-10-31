@@ -7,9 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"syscall/js"
 )
 
-type ApiResponse struct {
+var c chan bool
+
+type DailyPrices struct {
 	Metadata PriceMetadata    `json:"Meta Data"`
 	Prices   map[string]Price `json:"Time Series (Daily)"`
 }
@@ -27,7 +30,7 @@ type Price struct {
 	Volume string `json:"volume"`
 }
 
-func main() {
+func getDailyPricing(stockSymbol string) DailyPrices {
 	response, err := http.Get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo")
 	if err != nil {
 		fmt.Print(err.Error())
@@ -39,8 +42,32 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var responseObject ApiResponse
+	var responseObject DailyPrices
 	json.Unmarshal(responseData, &responseObject)
 
-	fmt.Println(responseObject.Metadata.Symbol)
+	return responseObject
+}
+
+func test(this js.Value, inputs []js.Value) interface{} {
+	symbol := inputs[0].String()
+	var priceData = getDailyPricing(symbol)
+
+	return js.ValueOf(priceData.Metadata.Symbol)
+}
+
+func main() {
+	window := js.Global()
+	doc := window.Get("document")
+	body := doc.Get("body")
+	div := doc.Call("createElement", "div")
+	div.Set("textContent", "hello!!")
+	body.Call("appendChild", div)
+	body.Set("onclick",
+		js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			div := doc.Call("createElement", "div")
+			div.Set("textContent", "click!!")
+			body.Call("appendChild", div)
+			return nil
+		}))
+	<-make(chan struct{})
 }
