@@ -6,11 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"syscall/js"
 )
-
-var c chan bool
 
 type DailyPrices struct {
 	Metadata PriceMetadata    `json:"Meta Data"`
@@ -34,7 +31,6 @@ func getDailyPricing(stockSymbol string) DailyPrices {
 	response, err := http.Get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo")
 	if err != nil {
 		fmt.Print(err.Error())
-		os.Exit(1)
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
@@ -48,26 +44,70 @@ func getDailyPricing(stockSymbol string) DailyPrices {
 	return responseObject
 }
 
-func test(this js.Value, inputs []js.Value) interface{} {
-	symbol := inputs[0].String()
-	var priceData = getDailyPricing(symbol)
-
-	return js.ValueOf(priceData.Metadata.Symbol)
+func main() {
+	js.Global().Set("getDailyPrices", getDailyPricingWrapper())
+	<-make(chan bool)
 }
 
-func main() {
-	window := js.Global()
-	doc := window.Get("document")
-	body := doc.Get("body")
-	div := doc.Call("createElement", "div")
-	div.Set("textContent", "hello!!")
-	body.Call("appendChild", div)
-	body.Set("onclick",
-		js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			div := doc.Call("createElement", "div")
-			div.Set("textContent", "click!!")
-			body.Call("appendChild", div)
+func getDailyPricingWrapper() js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		handler := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			resolve := args[0]
+			reject := args[1]
+
+			// Run this code asynchronously
+			go func() {
+				// Make the HTTP request
+				res, err := http.DefaultClient.Get("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo")
+				if err != nil {
+					errorConstructor := js.Global().Get("Error")
+					errorObject := errorConstructor.New(err.Error())
+					reject.Invoke(errorObject)
+					return
+				}
+				defer res.Body.Close()
+
+				data, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					errorConstructor := js.Global().Get("Error")
+					errorObject := errorConstructor.New(err.Error())
+					reject.Invoke(errorObject)
+					return
+				}
+
+				var responseObject DailyPrices
+				json.Unmarshal(data, &responseObject)
+
+				b, err := json.Marshal(responseObject)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				arrayConstructor := js.Global().Get("Uint8Array")
+				dataJS := arrayConstructor.New(len(b))
+				js.CopyBytesToJS(dataJS, b)
+
+				responseConstructor := js.Global().Get("Response")
+				response := responseConstructor.New(dataJS)
+
+				// Resolve the Promise
+				resolve.Invoke(response)
+			}()
+
+			// The handler of a Promise doesn't return any value
 			return nil
-		}))
-	<-make(chan struct{})
+		})
+
+		// Create and return the Promise object
+		promiseConstructor := js.Global().Get("Promise")
+		return promiseConstructor.New(handler)
+	})
+}
+
+func wrap(encoded string, err string) map[string]interface{} {
+	return map[string]interface{}{
+		"error":   err,
+		"encoded": encoded,
+	}
 }
