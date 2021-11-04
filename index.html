@@ -1,38 +1,34 @@
 <html>
     <head>
+        <meta charset="utf8"/>
+        <title>Go Api Sample</title>
         <script src="wasm_exec.js"></script>
         <script>
             const go = new Go();
-            WebAssembly.instantiateStreaming(fetch("encode.wasm"), go.importObject)
-                .then(result => {
-                go.run(result.instance);
-            });
+                WebAssembly.instantiateStreaming(fetch("alphaVantageApi.wasm"), go.importObject)
+                    .then(result => {
+                    go.run(result.instance);
+                });
         </script>
     </head>
     <body style="text-align-last: center">
         <div>
-            <textarea id="input" cols="40" rows="10">
-            </textarea>
-        </div>
-        <div>
             <input type="submit"
-                   value="> Base64 Encode <"
-                   onclick="encodeJs()"/>
+                   value="Get stock (demo gets price details for AAPL"
+                   onclick="getDailyPrice()"/>
         </div>
-        <div>
-            <textarea id="output" cols="40" rows="10">
-            </textarea>
-        </div>
-    </body>
-    <script>
-        async function encodeJs() {
-            try {
-                const response = await getDailyPrices()
-                const message = await response.json()
-                console.log(message)
-            } catch (err) {
-                console.error('Caught exception', err)
+        <script>
+            async function getDailyPrice() {
+                try {
+                    const response = await getDailyPricesGoApi("API_KEY_HERE", "AAPL")
+                    const message = await response.json()
+
+                    // Logs Go api output to console
+                    console.log(message)
+                } catch (err) {
+                    console.error('Caught exception', err)
+                }
             }
-        }
-    </script>
+        </script>
+    </body>
 </html>
