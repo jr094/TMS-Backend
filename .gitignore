@@ -17,3 +17,7 @@
 main
 .vscode/
 .idea/
+.DS_Store
+
+*.wasm
+

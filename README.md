@@ -1,27 +1,21 @@
-## To Use API 
-- Import WASM glue code 
-```
-<script src="wasm_exec.js"></script>
-```
-- Download `alphaVantageApi.wasm`
+## TMS-Backend
 
-- Init WebAssembly in head
+To compile WASM binary run:
 ```
-            const go = new Go();
-                WebAssembly.instantiateStreaming(fetch("alphaVantageApi.wasm"), go.importObject)
-                    .then(result => {
-                    go.run(result.instance);
-                });
+GOOS=js GOARCH=wasm go build -o lib.wasm
 ```
-- Call Go function in `async` JavaScript function
-```
-                try {
-                    const response = await getDailyPricesGoApi("API_KEY_HERE", "AAPL")
-                    const message = await response.json()
 
-                    // Logs Go api output to console
-                    console.log(message)
-                } catch (err) {
-                    console.error('Caught exception', err)
-                }
+To run packages as regular Go programs:
+
+- Use `dev.go` as main file and call libraries there
+- Run the following to run and test code
 ```
+go run dev.go
+```
+
+Add the following to the header of any file that uses the `syscall/js` library to restrict compilation of file only when compiling to `.wasm `
+```
+//go:build js && wasm
+```
+
+Try to separate core logic from `syscall/js` logic so programs can be tested and run locally without compiling to `.wasm` each time
