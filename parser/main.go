@@ -2,17 +2,17 @@ package parser
 
 import (
 	"fmt"
-	"time"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Transaction struct {
-	Symbol 			string
-	Action 			string
-	Gross 			float64
-	Quantity 		float64
-	Price 			float64
+	Symbol          string
+	Action          string
+	Gross           float64
+	Quantity        float64
+	Price           float64
 	TransactionDate string
 }
 
@@ -45,11 +45,11 @@ func ParseQuestTrade(csvString string) (map[string][]Transaction, error) {
 		}
 
 		transaction := Transaction{
-			Symbol: symbol,
-			Action: action,
-			Gross: gross,
-			Quantity: quantity,
-			Price: price,
+			Symbol:          symbol,
+			Action:          action,
+			Gross:           gross,
+			Quantity:        quantity,
+			Price:           price,
 			TransactionDate: dateStr,
 		}
 
