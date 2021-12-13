@@ -7,16 +7,9 @@ import (
 	"time"
 )
 
-type Transaction struct {
-	Symbol          string
-	Action          string
-	Gross           float64
-	Quantity        float64
-	Price           float64
-	TransactionDate string
-}
+type QuestradeParser struct{}
 
-func ParseQuestTrade(csvString string) (map[string][]Transaction, error) {
+func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Transaction, error) {
 	rows := strings.Split(csvString, "\n")
 
 	transactionsByDate := make(map[string][]Transaction)
@@ -31,10 +24,19 @@ func ParseQuestTrade(csvString string) (map[string][]Transaction, error) {
 
 		transactionDate := cols[0]
 		action := cols[2]
-		symbol := cols[3]
-		quantity, err := strconv.ParseFloat(cols[5], 64)
-		price, err := strconv.ParseFloat(cols[6], 64)
+		symbol := cols[4]
+		quantity, err := strconv.ParseFloat(cols[3], 64)
+		if err != nil {
+			continue
+		}
+		price, err := strconv.ParseFloat(cols[5], 64)
+		if err != nil {
+			continue
+		}
 		gross, err := strconv.ParseFloat(cols[7], 64)
+		if err != nil {
+			continue
+		}
 
 		dateValue, err := time.Parse("2006-01-02 15:04:05 AM", transactionDate)
 		dateStr := dateValue.Format("2006-01-02")
@@ -44,13 +46,18 @@ func ParseQuestTrade(csvString string) (map[string][]Transaction, error) {
 			return nil, err
 		}
 
+		parsedAction, err := ParseAction(action)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		transaction := Transaction{
 			Symbol:          symbol,
-			Action:          action,
+			Action:          parsedAction,
 			Gross:           gross,
 			Quantity:        quantity,
 			Price:           price,
-			TransactionDate: dateStr,
+			TransactionDate: dateValue,
 		}
 
 		if value, found := transactionsByDate[dateStr]; found {
