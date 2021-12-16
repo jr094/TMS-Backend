@@ -48,7 +48,7 @@ func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[stri
 		}
 
 		transactionDate := cols[td_i][1 : len(cols[td_i])-1]
-		timeParsedDate, err := time.Parse("2006-01-02 15:04:05 AM", transactionDate) // TODO: Fix date format to match IB date format
+		timeParsedDate, err := time.Parse("2006-01-02", transactionDate)
 		if err != nil {
 			fmt.Println(err)
 			continue
