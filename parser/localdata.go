@@ -20,7 +20,7 @@ type JsonTransaction struct {
 
 type LocalDataParser struct{}
 
-func (localparser LocalDataParser) ParseBrokerData() (map[string][]Transaction, error) {
+func (localparser LocalDataParser) ParseBrokerData() (map[string]int, map[string][]Transaction, error) {
 	jsonFile, err := os.Open("mydata.json")
 	if err != nil {
 		log.Fatalln(err)
@@ -36,6 +36,8 @@ func (localparser LocalDataParser) ParseBrokerData() (map[string][]Transaction, 
 	json.Unmarshal(data, &transactions)
 
 	transactionsByDate := make(map[string][]Transaction)
+	uniqueSymbols := make(map[string]int)
+
 	for _, t := range transactions {
 		dateStr := t.TransactionDate
 		timeParsedDate, err := time.Parse("2006-01-02", dateStr)
@@ -43,6 +45,10 @@ func (localparser LocalDataParser) ParseBrokerData() (map[string][]Transaction, 
 		parsedAction, err := ParseAction(t.Action)
 		if err != nil {
 			fmt.Println(err)
+		}
+
+		if _, ok := uniqueSymbols[t.Symbol]; !ok {
+			uniqueSymbols[t.Symbol] = 1
 		}
 
 		transaction := Transaction{
@@ -61,5 +67,5 @@ func (localparser LocalDataParser) ParseBrokerData() (map[string][]Transaction, 
 		}
 	}
 
-	return transactionsByDate, nil
+	return uniqueSymbols, transactionsByDate, nil
 }

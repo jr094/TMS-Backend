@@ -9,10 +9,11 @@ import (
 
 type InteractiveBrokersParser struct{}
 
-func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[string][]Transaction, error) {
+func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[string]int, map[string][]Transaction, error) {
 	rows := strings.Split(csvString, "\n")
 
 	transactionsByDate := make(map[string][]Transaction)
+	uniqueSymbols := make(map[string]int)
 
 	// parse first row to get correct column indexes
 	var td_i, act_i, sym_i, q_i, p_i, g_i, ac_i int
@@ -74,6 +75,11 @@ func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[stri
 		parsedAction, err := ParseAction(action)
 		if err != nil {
 			fmt.Println(err)
+			continue
+		}
+
+		if _, ok := uniqueSymbols[symbol]; !ok {
+			uniqueSymbols[symbol] = 1
 		}
 
 		transaction := Transaction{
@@ -92,5 +98,5 @@ func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[stri
 		}
 	}
 
-	return transactionsByDate, nil
+	return uniqueSymbols, transactionsByDate, nil
 }

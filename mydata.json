@@ -22,5 +22,13 @@
         "Quantity": 60,
         "Price": 144,
         "TransactionDate": "2021-10-18"
+    },
+    {
+        "Symbol": "AAPL",
+        "Action": "Buy",
+        "Gross": 9526.40,
+        "Quantity": 64,
+        "Price": 152,
+        "TransactionDate": "2021-08-31"
     }
 ]
