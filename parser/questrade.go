@@ -9,9 +9,10 @@ import (
 
 type QuestradeParser struct{}
 
-func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Transaction, error) {
+func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Transaction, map[string]struct{}, error) {
 	rows := strings.Split(csvString, "\n")
 
+	stocksList := map[string]struct{}{}
 	transactionsByDate := make(map[string][]Transaction)
 
 	// first row should be the columns
@@ -25,7 +26,7 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 		transactionDate := cols[0]
 		action := cols[2]
 		symbol := cols[4]
-		quantity, err := strconv.ParseFloat(cols[3], 64)
+		quantity, err := strconv.ParseInt(cols[3], 10, 64)
 		if err != nil {
 			continue
 		}
@@ -43,7 +44,7 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 
 		if err != nil {
 			fmt.Println(err)
-			return nil, err
+			return nil, nil, err
 		}
 
 		parsedAction, err := ParseAction(action)
@@ -65,7 +66,12 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 		} else {
 			transactionsByDate[dateStr] = []Transaction{transaction}
 		}
+
+		// add stock to unique stock list
+		if _, ok := stocksList[symbol]; !ok {
+			stocksList[symbol] = struct{}{}
+		}
 	}
 
-	return transactionsByDate, nil
+	return transactionsByDate, stocksList, nil
 }

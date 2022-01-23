@@ -17,13 +17,16 @@ type Transaction struct {
 	Symbol          string
 	Action          Action
 	Gross           float64
-	Quantity        float64
+	Quantity        int64
 	Price           float64
 	TransactionDate time.Time
 }
 
 type BrokerParser interface {
 	ParseString(contents string) (map[string][]Transaction, error)
+}
+
+type Document struct {
 }
 
 func ParseAction(action string) (Action, error) {
@@ -36,4 +39,8 @@ func ParseAction(action string) (Action, error) {
 		err := fmt.Errorf("could not parse string %s into an Action type", action)
 		return -1, err
 	}
+}
+
+func ParseDocument(filePath string, broker string) (Document, error) {
+	return Document{}, nil
 }

@@ -9,8 +9,10 @@ import (
 
 type TDAmeritradeParser struct{}
 
-func (tdParser TDAmeritradeParser) ParseString(csvString string) (map[string][]Transaction, error) {
+func (tdParser TDAmeritradeParser) ParseString(csvString string) (map[string][]Transaction, map[string]struct{}, error) {
 	rows := strings.Split(csvString, "\n")
+
+	stocksList := map[string]struct{}{}
 
 	transactionsByDate := make(map[string][]Transaction)
 
@@ -25,7 +27,7 @@ func (tdParser TDAmeritradeParser) ParseString(csvString string) (map[string][]T
 		transactionDate := cols[0]
 		action := cols[2]
 		symbol := cols[3]
-		quantity, err := strconv.ParseFloat(cols[5], 64)
+		quantity, err := strconv.ParseInt(cols[5], 10, 64)
 		if err != nil {
 			continue
 		}
@@ -64,7 +66,12 @@ func (tdParser TDAmeritradeParser) ParseString(csvString string) (map[string][]T
 		} else {
 			transactionsByDate[dateStr] = []Transaction{transaction}
 		}
+
+		// add stock to unique stock list
+		if _, ok := stocksList[symbol]; !ok {
+			stocksList[symbol] = struct{}{}
+		}
 	}
 
-	return transactionsByDate, nil
+	return transactionsByDate, stocksList, nil
 }
