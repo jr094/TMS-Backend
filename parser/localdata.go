@@ -13,7 +13,7 @@ type JsonTransaction struct {
 	Symbol          string  `json:"Symbol"`
 	Action          string  `json:"Action"`
 	Gross           float64 `json:"Gross"`
-	Quantity        float64 `json:"Quantity"`
+	Quantity        int64   `json:"Quantity"`
 	Price           float64 `json:"Price"`
 	TransactionDate string  `json:"TransactionDate"`
 }
@@ -40,7 +40,7 @@ func (localparser LocalDataParser) ParseBrokerData() (map[string]int, map[string
 
 	for _, t := range transactions {
 		dateStr := t.TransactionDate
-		timeParsedDate, err := time.Parse("2006-01-02", dateStr)
+		timeParsedDate, _ := time.Parse("2006-01-02", dateStr)
 
 		parsedAction, err := ParseAction(t.Action)
 		if err != nil {
