@@ -9,11 +9,12 @@ import (
 
 type QuestradeParser struct{}
 
-func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Transaction, map[string]struct{}, error) {
+func (qparser QuestradeParser) ParseString(csvString string) (map[string]int, map[string][]Transaction, error) {
 	rows := strings.Split(csvString, "\n")
 
 	stocksList := map[string]struct{}{}
 	transactionsByDate := make(map[string][]Transaction)
+	uniqueSymbols := make(map[string]int)
 
 	// first row should be the columns
 	for _, row := range rows[1:] {
@@ -25,12 +26,12 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 
 		transactionDate := cols[0]
 		action := cols[2]
-		symbol := cols[4]
-		quantity, err := strconv.ParseInt(cols[3], 10, 64)
+		symbol := cols[3]
+		quantity, err := strconv.ParseFloat(cols[5], 64)
 		if err != nil {
 			continue
 		}
-		price, err := strconv.ParseFloat(cols[5], 64)
+		price, err := strconv.ParseFloat(cols[6], 64)
 		if err != nil {
 			continue
 		}
@@ -44,12 +45,17 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 
 		if err != nil {
 			fmt.Println(err)
-			return nil, nil, err
+			continue
 		}
 
 		parsedAction, err := ParseAction(action)
 		if err != nil {
 			fmt.Println(err)
+			continue
+		}
+
+		if _, ok := uniqueSymbols[symbol]; !ok {
+			uniqueSymbols[symbol] = 1
 		}
 
 		transaction := Transaction{
@@ -73,5 +79,5 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string][]Trans
 		}
 	}
 
-	return transactionsByDate, stocksList, nil
+	return uniqueSymbols, transactionsByDate, nil
 }
