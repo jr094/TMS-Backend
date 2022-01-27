@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"TMS-Backend/parser"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,13 +10,13 @@ import (
 
 func TestQuestradeParser(t *testing.T) {
 	curDir, _ := os.Getwd()
-	testFile := filepath.Join(curDir, "../test/files/questrade.csv")
+	testFile := filepath.Join(curDir, "files/questrade.csv")
 	content, err := ioutil.ReadFile(testFile)
 	if err != nil || content == nil {
 		t.Errorf("Could not parse questrade file - ERR: %s", err)
 	}
 
-	questradeParser := QuestradeParser{}
+	questradeParser := parser.QuestradeParser{}
 	symbols, transactionsByDate, err := questradeParser.ParseString(string(content))
 	if err != nil {
 		t.Errorf("Could not parse Questrade CSV string %s", err)
