@@ -27,7 +27,7 @@ func (qparser QuestradeParser) ParseString(csvString string) (map[string]int, ma
 		transactionDate := cols[0]
 		action := cols[2]
 		symbol := cols[3]
-		quantity, err := strconv.ParseFloat(cols[5], 64)
+		quantity, err := strconv.ParseInt(cols[5], 10, 64)
 		if err != nil {
 			continue
 		}
