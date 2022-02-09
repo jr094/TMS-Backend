@@ -10,7 +10,7 @@ import (
 type InteractiveBrokersParser struct{}
 
 func (ibParser InteractiveBrokersParser) ParseString(csvString string) (map[string]int, map[string][]Transaction, error) {
-	rows := strings.Split(csvString, "\n")
+	rows := strings.Split(strings.ReplaceAll(csvString, "\r\n", "\n"), "\n")
 
 	stocksList := map[string]struct{}{}
 	transactionsByDate := make(map[string][]Transaction)

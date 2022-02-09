@@ -1,0 +1,2 @@
+"UnderlyingSymbol","Strike","Put/Call","DateTime","TradeDate","Exchange","Quantity","FifoPnlRealized","CommodityType","IBCommission","IBCommissionCurrency","NetCash","ClosePrice","CostBasis","AssetClass","Expiry","TradePrice","Proceeds","Symbol","Buy/Sell"
+"","","","2021-11-12;16:20:00","2021-11-12","--","100","0","","0","USD","-15000","150","15000","STK","","150","-15000","AAPL","BUY"
