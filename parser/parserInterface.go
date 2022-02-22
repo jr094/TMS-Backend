@@ -13,6 +13,15 @@ const (
 	Sell
 )
 
+type Broker int64
+
+const (
+	UndefinedBroker Broker = iota // Default enum value
+	TDAmeritrade
+	Questrade
+	InteraciveBrokers
+)
+
 type Transaction struct {
 	Symbol          string
 	Action          Action
@@ -22,11 +31,12 @@ type Transaction struct {
 	TransactionDate time.Time
 }
 
-type BrokerParser interface {
-	ParseString(contents string) (map[string][]Transaction, error)
+type ParsedDocument struct {
+	Symbols      map[string]int
+	Transactions map[string][]Transaction
 }
-
-type Document struct {
+type BrokerParser interface {
+	ParseString(contents string) (map[string]int, map[string][]Transaction, error)
 }
 
 func ParseAction(action string) (Action, error) {
@@ -41,6 +51,25 @@ func ParseAction(action string) (Action, error) {
 	}
 }
 
-func ParseDocument(filePath string, broker string) (Document, error) {
-	return Document{}, nil
+func BrokerParserMap(broker Broker) BrokerParser {
+	switch broker {
+	case TDAmeritrade:
+		return TDAmeritradeParser{}
+	case InteraciveBrokers:
+		return InteractiveBrokersParser{}
+	case Questrade:
+		return QuestradeParser{}
+	default:
+		return nil
+	}
+}
+
+func ParseDocument(contents string, broker Broker) (ParsedDocument, error) {
+	brokerParser := BrokerParserMap(broker)
+	if brokerParser == nil {
+		err := fmt.Errorf("broker type was undefined")
+		return ParsedDocument{}, err
+	}
+	symbols, transactions, err := brokerParser.ParseString(contents)
+	return ParsedDocument{symbols, transactions}, err
 }

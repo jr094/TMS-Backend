@@ -7,6 +7,7 @@ import (
 	"TMS-Backend/parser"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"syscall/js"
 )
 
@@ -17,8 +18,23 @@ func main() {
 			Set("Name function will have in JavaScript", Go function)
 	*/
 	js.Global().Set("getDailyPricesGoApi", api.GetDailyPricing())
+	// Parse CSV string in by calling parseDocument(csvString, brokerType "tdameritrade, interactivebrokers or questrade")
 	js.Global().Set("parseDocument", ParseDocument())
 	<-make(chan bool)
+}
+
+func GetBrokerEnum(broker string) parser.Broker {
+	lowercase := strings.ToLower(broker)
+	switch lowercase {
+	case "tdameritrade":
+		return parser.TDAmeritrade
+	case "interactivebrokers":
+		return parser.InteraciveBrokers
+	case "questrade":
+		return parser.Questrade
+	default:
+		return parser.UndefinedBroker
+	}
 }
 
 func ParseDocument() js.Func {
@@ -30,7 +46,7 @@ func ParseDocument() js.Func {
 			reject := args[1]
 
 			go func() {
-				res, err := parser.ParseDocument(filepath, documentType)
+				res, err := parser.ParseDocument(filepath, GetBrokerEnum(documentType))
 
 				if err != nil {
 					errorConstructor := js.Global().Get("Error")
