@@ -24,8 +24,8 @@ func TestQuestradeParser(t *testing.T) {
 
 	_, ok := symbols["AAPL"]
 	assert.Truef(t, ok, "AAPL was not in stocklist after parse")
-	assert.Equal(t, 1, len(symbols))
-	assert.Equal(t, 1, len(transactionsByDate), "Transaction count not 1")
+	assert.NotEqual(t, 0, len(symbols), "Symbols count was 0")
+	assert.NotEqual(t, 0, len(transactionsByDate), "Transaction count was 0")
 }
 
 func TestInteractiveParser(t *testing.T) {
