@@ -1,2 +1,4 @@
-date,id,action,symbol,unused,quantity,price,gross
-2020-10-09 15:04:05 AM,1,BUY,AAPL,unused,10,123,1230.00
+Transaction Date,Settlement Date,Action,Symbol,Description,Quantity,Price,Gross Amount,Commission,Net Amount,Currency,Account #,Activity Type,Account Type
+2021-11-12 12:00:00 AM,2021-11-16 12:00:00 AM,Buy,IBM,IBM WE ACTED AS AGENT,10.00000,222.53000000,-1332.01,-4.99,-1337.77,CAD,111,Trades,Individual
+2021-08-20 12:00:00 AM,2021-08-24 12:00:00 AM,Buy,RY.TO,ROYAL BANK OF CANADA WE ACTED AS AGENT,30.00000,179.13000000,-415.63,-5.06,-420.69,CAD,111,Trades,Individual
+2021-01-26 12:00:00 AM,2021-01-28 12:00:00 AM,Buy,AAPL,WALT DISNEY CO WE ACTED AS AGENT,37.00000,111.81110000,-2995.05,-4.95,-3000.00,USD,111,Trades,Individual
